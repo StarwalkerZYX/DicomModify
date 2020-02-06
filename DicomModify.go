@@ -12,6 +12,8 @@ import (
 	"github.com/StarwalkerZYX/DicomModify/folderutils"
 	"github.com/suyashkumar/dicom"
 	"github.com/suyashkumar/dicom/dicomlog"
+	"github.com/suyashkumar/dicom/element"
+	//"github.com/suyashkumar/dicom/element"
 )
 
 var (
@@ -67,7 +69,8 @@ func main() {
 
 		parsedData, err := p.Parse(dicom.ParseOptions{DropPixelData: true})
 		if parsedData == nil || err != nil {
-			log.Panicf("Error reading %s: %v", f, err)
+			log.Panicf("Error reading %s: %v. Maybe not a valid DICOM File. Ignore it.", f, err)
+			continue
 		}
 
 		var newF string
@@ -79,6 +82,18 @@ func main() {
 
 		modifiedDicomFiles = append(modifiedDicomFiles, newF)
 		fmt.Println(newF)
+
+		dataSetModified := *parsedData
+
+		var pn *element.Element
+		pn, err = dataSetModified.FindElementByName("PatientName")
+
+		if err != nil {
+			println(err)
+		} else {
+			patientName, _ := pn.GetString()
+			println(patientName)
+		}
 	}
 
 	if err != nil {
